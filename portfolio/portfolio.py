@@ -1,6 +1,6 @@
 import json, os
-from securities import security
-from currecy import currecy
+from securities.security import Share, Bond
+from currency import currency_functions
 
 class SecInfo:
     def __init__(self) -> None:
@@ -91,18 +91,20 @@ class Summary:
     def create_table(self):
         table = dict()
         for potfolio in self.portfolios:
-            for c_security in self.portfolios[potfolio].securities:
-                quantity = self.portfolios[potfolio].securities[c_security]
-                info = self.sec_info.info[c_security]
+            for security_name in self.portfolios[potfolio].securities:
+                quantity = self.portfolios[potfolio].securities[security_name]
+                info = self.sec_info.info[security_name]
                 
                 if info['goal'] not in table:
                         table[info['goal']] = 0.0
                 if info['sectype'] == 'share':
-                    c_sec = security.Share(c_security, info['stock'])
+                    security = Share(security_name, info['stock'])
                 elif info['sectype'] == 'bond':
-                    c_sec = security.Bond(c_security, info['stock'])
-                prc, curr = c_sec.price()
-                table[info['goal']] += currecy.convert_to_rouble(prc, curr) * quantity
+                    security = Bond(security_name, info['stock'])
+                price, currancy = security.price()
+                table[info['goal']] += \
+                    currency_functions.convert_to_rouble(
+                        price, currancy) * quantity
 
         return table
 
