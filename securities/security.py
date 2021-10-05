@@ -54,7 +54,7 @@ class Share(Security):
     def __init__(self, ticker: str, stock: str) -> None:
         super().__init__(ticker, stock)
 
-    def price(self) -> float:
+    def price(self) -> tuple[float, str]:
         if self.stock == "MOEX":
             return float(self.load_field_moex_("marketdata", "LAST")), \
                 self.load_field_moex_("securities", "CURRENCYID")
@@ -65,7 +65,7 @@ class Bond(Security):
     def __init__(self, ticker: str, stock: str) -> None:
         super().__init__(ticker, stock)
 
-    def price(self) -> float:
+    def price(self) -> tuple[float, str]:
         if self.stock == "MOEX":
             percent_price = float(self.load_field_moex_("marketdata", "LAST"))
             face_value = float(self.load_field_moex_("securities", "FACEVALUE"))

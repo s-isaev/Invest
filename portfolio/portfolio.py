@@ -4,11 +4,11 @@ from currency import currency_functions
 
 class SecInfo:
     def __init__(self) -> None:
-        self.info = dict()
+        self.info = dict[str, dict[str, str]]()
 
     def load(self, path) -> None:
         with open(path, 'r') as json_file:
-            self.info = json.load(json_file)
+            self.info: dict[str, dict[str, str]] = json.load(json_file)
 
     def dump(self, path) -> None:
         with open(path, 'w') as json_file:
@@ -23,13 +23,13 @@ class SecInfo:
         else:
             print("Nothing to delete.")
 
-class Portfolios:
+class PortfoliosNames:
     def __init__(self) -> None:
-        self.portfolios = list()
+        self.portfolios = list[str]()
 
     def load(self, path) -> None:
         with open(path, 'r') as json_file:
-            self.portfolios = json.load(json_file)
+            self.portfolios: list[str] = json.load(json_file)
 
     def dump(self, path) -> None:
         with open(path, 'w') as json_file:
@@ -47,11 +47,11 @@ class Portfolios:
 
 class Portfolio:
     def __init__(self) -> None:
-        self.securities = dict()
+        self.securities = dict[str, int]()
 
     def load(self, path) -> None:
         with open(path, 'r') as json_file:
-            self.securities = json.load(json_file)
+            self.securities: dict[str, int] = json.load(json_file)
 
     def dump(self, path) -> None:
         with open(path, 'w') as json_file:
@@ -69,17 +69,17 @@ class Portfolio:
 class Summary:
     def __init__(self, path:str) -> None:
         self.path = path
-        self.portfolios_desctiptions = Portfolios()
+        self.portfolios_names = PortfoliosNames()
         self.sec_info = SecInfo()
-        self.portfolios = dict()
+        self.portfolios = dict[str, Portfolio]()
 
     def add_portfolio(self, name: str) -> None:
-        self.portfolios_desctiptions.add_portfolio(name)
+        self.portfolios_names.add_portfolio(name)
         self.portfolios[name] = Portfolio()
 
     def dump(self):
         path = os.path.join(self.path, 'portfolios.json')
-        self.portfolios_desctiptions.dump(path)
+        self.portfolios_names.dump(path)
 
         path = os.path.join(self.path, 'securities.json')
         self.sec_info.dump(path)
@@ -90,9 +90,9 @@ class Summary:
 
     def create_table(self):
         table = dict()
-        for potfolio in self.portfolios:
-            for security_name in self.portfolios[potfolio].securities:
-                quantity = self.portfolios[potfolio].securities[security_name]
+        for potfolio_name in self.portfolios:
+            for security_name in self.portfolios[potfolio_name].securities:
+                quantity = self.portfolios[potfolio_name].securities[security_name]
                 info = self.sec_info.info[security_name]
                 
                 if info['goal'] not in table:
@@ -101,10 +101,11 @@ class Summary:
                     security = Share(security_name, info['stock'])
                 elif info['sectype'] == 'bond':
                     security = Bond(security_name, info['stock'])
+                else:
+                    raise "error"
                 price, currancy = security.price()
                 table[info['goal']] += \
                     currency_functions.convert_to_rouble(
                         price, currancy) * quantity
 
         return table
-
