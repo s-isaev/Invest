@@ -1,10 +1,34 @@
+from __future__ import annotations
 import requests
 from xml.etree import ElementTree
 import yfinance
+from forex_python.converter import CurrencyRates
 
-class Security():
-    def __init__(self, ticker: str, stock: str) -> None:
+
+class Paper():
+    def __init__(self, ticker: str) -> None:
         self.ticker = ticker
+
+
+class Currency(Paper):
+    def __init__(self, ticker: str) -> None:
+        super().__init__(ticker)
+        if ticker == "SUR" or ticker == "RUR":
+            self.ticker = "RUB"
+
+    def price(self) -> tuple[float, Currency]:
+        return 1.0, self
+
+    def convert(self, target: Currency, value: float):
+        if self.ticker == target.ticker:
+            return value
+        c = CurrencyRates()
+        return value * c.get_rate(self.ticker, target.ticker)
+
+
+class Security(Paper):
+    def __init__(self, ticker: str, stock: str) -> None:
+        super().__init__(ticker)
         if stock == "MOEX" or stock == "OTHR":
             self.stock = stock
         else:
@@ -18,10 +42,11 @@ class Security():
             self.name = stock.info['shortName']
 
     def load_board_(self) -> str:
-        url = "https://iss.moex.com/iss/securities/"+ self.ticker +".xml" \
-        "?iss.meta=off&iss.only=boards&boards.columns=is_primary,boardid"
+        url = "https://iss.moex.com/iss/securities/" + self.ticker + ".xml" \
+            "?iss.meta=off&iss.only=boards&boards.columns=is_primary,boardid"
         response = requests.get(url)
-        roots = ElementTree.fromstring(response.content).findall('.//data//rows//row')
+        roots = ElementTree.fromstring(
+            response.content).findall('.//data//rows//row')
         self.board_id_ = None
         for root in roots:
             items = root.items()
@@ -31,9 +56,9 @@ class Security():
         if self.board_id_ is None:
             raise "Not found."
 
-        if self.board_id_ in ["TQOB","EQOB","TQOD","TQCB","EQQI","TQIR"]:
+        if self.board_id_ in ["TQOB", "EQOB", "TQOD", "TQCB", "EQQI", "TQIR"]:
             self.moex_security_type_ = "bonds"
-        elif self.board_id_ in ["TQTF","TQBR","SNDX","TQIF","TQTD"]:
+        elif self.board_id_ in ["TQTF", "TQBR", "SNDX", "TQIF", "TQTD"]:
             self.moex_security_type_ = "shares"
         else:
             raise "Unknown board."
@@ -50,25 +75,29 @@ class Security():
                 return items[1][1]
         raise "Not found."
 
+
 class Share(Security):
     def __init__(self, ticker: str, stock: str) -> None:
         super().__init__(ticker, stock)
 
-    def price(self) -> tuple[float, str]:
+    def price(self) -> tuple[float, Currency]:
         if self.stock == "MOEX":
             return float(self.load_field_moex_("marketdata", "LAST")), \
-                self.load_field_moex_("securities", "CURRENCYID")
+                Currency(self.load_field_moex_("securities", "CURRENCYID"))
         stock = yfinance.Ticker(self.ticker)
-        return stock.info['regularMarketPrice'], 'USD'
+        return stock.info['regularMarketPrice'], Currency("USD")
+
 
 class Bond(Security):
     def __init__(self, ticker: str, stock: str) -> None:
         super().__init__(ticker, stock)
 
-    def price(self) -> tuple[float, str]:
+    def price(self) -> tuple[float, Currency]:
         if self.stock == "MOEX":
             percent_price = float(self.load_field_moex_("marketdata", "LAST"))
-            face_value = float(self.load_field_moex_("securities", "FACEVALUE"))
-            accruedint = float(self.load_field_moex_("securities", "ACCRUEDINT"))
-            return percent_price / 100 * face_value + accruedint
+            face_value = float(self.load_field_moex_(
+                "securities", "FACEVALUE"))
+            accruedint = float(self.load_field_moex_(
+                "securities", "ACCRUEDINT"))
+            return percent_price / 100 * face_value + accruedint, Currency("RUB")
         raise "Only MOEX for bonds supproted."
