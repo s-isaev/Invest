@@ -76,7 +76,17 @@ class Summary:
             path = os.path.join(self.path, name+'.json')
             self.portfolios[name].dump(path)
 
+    def load(self):
+        path = os.path.join(self.path, 'portfolios.json')
+        self.portfolios_names.load(path)
 
+        path = os.path.join(self.path, 'securities.json')
+        self.sec_info.load(path)
+
+        for name in self.portfolios_names:
+            path = os.path.join(self.path, name+'.json')
+            self.portfolios[name] = Portfolio()
+            self.portfolios[name].load(path)
 
     def get_invested_by_classes(self):
         pools = dict()
