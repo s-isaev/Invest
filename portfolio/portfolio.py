@@ -14,12 +14,6 @@ class Json:
     def __getitem__(self, index):
         return self.data.__getitem__(index)
 
-    def delete_elem(self, elem: str) -> None:
-        if elem in self:
-            del self.data[elem]
-        else:
-            print("Nothing to delete.")
-
     def load(self, path) -> None:
         with open(path, 'r') as json_file:
             self.data = json.load(json_file)
@@ -29,7 +23,7 @@ class Json:
             json.dump(self.data, json_file, indent=4, ensure_ascii=False)
 
 
-class SecInfo(Json):
+class SecuritiesInfo(Json):
     def __init__(self) -> None:
         self.data: dict[str, dict[str, str]] = dict[str, dict[str, str]]()
 
@@ -37,56 +31,43 @@ class SecInfo(Json):
         self.data[ticker] = {'goal': goal, 'sectype': sectype, 'stock': stock}
 
 
-class PortfoliosNames(Json):
+class Portfolios(Json):
     def __init__(self) -> None:
-        self.data: list[str] = list[str]()
+        self.data: dict[str, dict] = dict()
 
-    def add_portfolio(self, portfolio: str) -> None:
-        if portfolio not in self.data:
-            self.data.append(portfolio)
+    def add_porfolio(self, portfolio: str) -> None:
+        self.data[portfolio] = dict()
 
-
-class Portfolio(Json):
-    def __init__(self) -> None:
-        self.data: dict = dict()
-
-    def set_paper(self, ticker: str, quantity) -> None:
-        self.data[ticker] = quantity
+    def set_paper(self, portfolio: str, ticker: str, quantity) -> None:
+        if portfolio in self.data:
+            self.data[portfolio][ticker] = quantity
+        else:
+            print("Portfolio does not exist.")
 
 
 class Summary:
     def __init__(self, path: str) -> None:
         self.path = path
-        self.portfolios_names = PortfoliosNames()
-        self.sec_info = SecInfo()
-        self.portfolios = dict[str, Portfolio]()
+        self.sec_info = SecuritiesInfo()
+        self.portfolios = Portfolios()
 
     def add_portfolio(self, name: str) -> None:
-        self.portfolios_names.add_portfolio(name)
-        self.portfolios[name] = Portfolio()
+        self.portfolios.add_porfolio(name)
+
+    def set_paper(self, portfolio: str, ticker: str, quantity) -> None:
+        self.portfolios.set_paper(portfolio, ticker, quantity)
 
     def dump(self):
         path = os.path.join(self.path, 'portfolios.json')
-        self.portfolios_names.dump(path)
-
+        self.portfolios.dump(path)
         path = os.path.join(self.path, 'securities.json')
         self.sec_info.dump(path)
 
-        for name in self.portfolios:
-            path = os.path.join(self.path, name+'.json')
-            self.portfolios[name].dump(path)
-
     def load(self):
         path = os.path.join(self.path, 'portfolios.json')
-        self.portfolios_names.load(path)
-
+        self.portfolios.load(path)
         path = os.path.join(self.path, 'securities.json')
         self.sec_info.load(path)
-
-        for name in self.portfolios_names:
-            path = os.path.join(self.path, name+'.json')
-            self.portfolios[name] = Portfolio()
-            self.portfolios[name].load(path)
 
     def get_invested_by_classes(self):
         pools = dict()
