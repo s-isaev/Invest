@@ -77,7 +77,7 @@ class Security(Paper):
 
 
 class Share(Security):
-    def __init__(self, ticker: str, stock: str) -> None:
+    def __init__(self, ticker: str, stock: str = None) -> None:
         super().__init__(ticker, stock)
 
     def price(self) -> tuple[float, Currency]:

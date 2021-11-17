@@ -54,6 +54,9 @@ class Summary:
     def add_portfolio(self, name: str) -> None:
         self.portfolios.add_porfolio(name)
 
+    def set_paper_info(self, goal: str, ticker: str, sectype: str, stock: str = None) -> None:
+        self.sec_info.set_info(sectype, ticker, goal, stock)
+
     def set_paper(self, portfolio: str, ticker: str, quantity) -> None:
         self.portfolios.set_paper(portfolio, ticker, quantity)
 
