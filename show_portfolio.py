@@ -17,9 +17,14 @@ TOTAL_LEN = MAX_CLASS_NAME_LEN + MAX_SUMM_ROUBLES_LEN + MAX_SUMM_DOLLARS_LEN + 2
 
 def wriie_header():
     print(
-        ' ' * 15 + 'RUB' + ' ' * 9 + 'USD' + ' ' * 5 + 'Share' + ' ' * 4 + 'Target' + 
-        ' ' * 4 + 'Ratio' + ' ' * 5 + 'Buy,RUB' + ' ' * 4 + 'Buy,USD'
+        ' ' * 25 + 'Price'+ ' ' * 5 + 'Share' + ' ' * 4 + 
+        'Target' + ' ' * 4 + 'Ratio' + ' ' * 18 + 'Buy', end='')
+    print(' ' * 26 + 'Change' + ' ' * 4 + 'Year Profitability')
+    print(
+        ' ' * 13 + '(RUB)' + ' ' * 7 + '(USD)' + ' ' * 5 + ' ' * 4 +
+        ' ' * 4 + ' ' * 23 + '(RUB)' + ' ' * 4 + '(USD)', end=''
     )
+    print(' '*8 + '***|' + ' ' * 5+ '(RUB)' + ' ' * 5 + '(USD)'+ ' ' * 7 + '(RUB)' + ' ' * 5 + '(USD)')
 
 classes = {
     "Gold": "GLD",
@@ -35,11 +40,11 @@ classes = {
 }
 
 def write_line(class_name, summ_roubles, summ_dollars, percent=None, target=None, ratio=None, buyrub=None, buyusd=None, extra_line=False):
-    print('_' * (TOTAL_LEN + 3 + 10 + 10 + 8 + 21))
+    print('_' * (TOTAL_LEN + 3 + 10 + 10 + 8 + 19))
     str_class = (classes[class_name])
     if extra_line:
         print()
-        print('_' * (TOTAL_LEN + 3 + 10 + 10 + 8 + 21))
+        print('_' * (TOTAL_LEN + 3 + 10 + 10 + 8 + 19))
     print(str_class, end='|    ')
     print("{:10,.2f}".format(summ_roubles), end='    ')
     print("{:8,.2f}".format(summ_dollars), end='    ' )
@@ -58,9 +63,9 @@ def write_line(class_name, summ_roubles, summ_dollars, percent=None, target=None
         print("{:5,.2f}".format(ratio), end='    ')
 
     if buyrub is not None:
-        print("{:8,.2f}".format(buyrub), end='    ')
+        print("{:8,.2f}".format(buyrub), end='  ')
     if buyusd is not None:
-        print("{:7,.2f}".format(buyusd), end='    ' )
+        print("{:7,.2f}".format(buyusd), end='')
 
     print()
 
@@ -129,13 +134,13 @@ while True:
         invested_by_classes["Cash"] * rubusd,
         invested_by_classes["Cash"]/capital_no_eurobonds
     )
-    write_line(
-        "Eurobonds", 
-        invested_by_classes["Eurobonds"], 
-        invested_by_classes["Eurobonds"] * rubusd,
-        extra_line=True
-    )
-    write_line("Capital", capital, capital * rubusd)
+    # write_line(
+    #     "Eurobonds", 
+    #     invested_by_classes["Eurobonds"], 
+    #     invested_by_classes["Eurobonds"] * rubusd,
+    #     extra_line=True
+    # )
+    write_line("Capital", capital, capital * rubusd, extra_line=True)
 
     print("\nLast updated at", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     time.sleep(60)
