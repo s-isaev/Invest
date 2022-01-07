@@ -42,7 +42,7 @@ class Security(Paper):
         else:
             stock = yfinance.Ticker(self.ticker)
             self.name = stock.info['shortName']
-            self.currency = stock.info['currency']
+            self.currency = Currency(stock.info['currency'])
 
     def load_board_(self) -> str:
         url = "https://iss.moex.com/iss/securities/" + self.ticker + ".xml" \
@@ -110,7 +110,7 @@ class Share(Security):
             return self.field_to_float(price[0], meta), self.currency
 
         stock = yfinance.Ticker(self.ticker)
-        return stock.info['regularMarketPrice'], Currency("USD")
+        return stock.info['regularMarketPrice'], self.currency
 
 
 class Bond(Security):
