@@ -5,9 +5,6 @@ from multiprocessing.pool import ThreadPool
 
 
 class Json:
-    def __init__(self) -> None:
-        self.data = None
-
     def __iter__(self):
         return self.data.__iter__()
 
@@ -25,20 +22,20 @@ class Json:
 
 class SecuritiesInfo(Json):
     def __init__(self) -> None:
-        self.data: dict[str, dict[str, str]] = dict[str, dict[str, str]]()
+        self.data = dict[str, dict[str, str]]()
 
-    def set_info(self, sectype: str, ticker: str, goal: str, stock: str = None) -> None:
-        self.data[ticker] = {'goal': goal, 'sectype': sectype, 'stock': stock}
+    def set_info(self, sectype: str, ticker: str, goal: str, stock: str|None = None) -> None:
+        self.data[ticker] = {'sectype': sectype, 'stock': stock, 'goal': goal,}
 
 
 class Portfolios(Json):
     def __init__(self) -> None:
-        self.data: dict[str, dict] = dict()
+        self.data = dict[str, dict[str, int|float]]()
 
     def add_porfolio(self, portfolio: str) -> None:
-        self.data[portfolio] = dict()
+        self.data[portfolio] = dict[str, int|float]()
 
-    def set_paper(self, portfolio: str, ticker: str, quantity) -> None:
+    def set_paper(self, portfolio: str, ticker: str, quantity: int|float) -> None:
         if portfolio in self.data:
             self.data[portfolio][ticker] = quantity
         else:
@@ -54,10 +51,10 @@ class Summary:
     def add_portfolio(self, name: str) -> None:
         self.portfolios.add_porfolio(name)
 
-    def set_paper_info(self, goal: str, ticker: str, sectype: str, stock: str = None) -> None:
+    def set_paper_info(self, goal: str, ticker: str, sectype: str, stock: str|None = None) -> None:
         self.sec_info.set_info(sectype, ticker, goal, stock)
 
-    def set_paper(self, portfolio: str, ticker: str, quantity) -> None:
+    def set_paper(self, portfolio: str, ticker: str, quantity: int|float) -> None:
         self.portfolios.set_paper(portfolio, ticker, quantity)
 
     def dump(self):

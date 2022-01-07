@@ -15,7 +15,7 @@ MAX_SUMM_ROUBLES_LEN = 10
 MAX_SUMM_DOLLARS_LEN = 8
 TOTAL_LEN = MAX_CLASS_NAME_LEN + MAX_SUMM_ROUBLES_LEN + MAX_SUMM_DOLLARS_LEN + 2
 
-def wriie_header():
+def write_header():
     print(
         ' ' * 25 + 'Price'+ ' ' * 5 + 'Share' + ' ' * 4 + 
         'Target' + ' ' * 4 + 'Ratio' + ' ' * 18 + 'Buy', end='')
@@ -105,7 +105,7 @@ while True:
     inv_classes.sort(key=cmp_key)
 
     os.system('cls')
-    wriie_header()
+    write_header()
     for inv_class in inv_classes:
         rub_n = invested_by_classes[inv_class[0]]
         ratio = 1/(targets[inv_class[0]] / (invested_by_classes[inv_class[0]]/capital_no_eurobonds))
