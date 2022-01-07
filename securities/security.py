@@ -105,7 +105,9 @@ class Share(Security):
     def price(self) -> tuple[float, Currency]:
         if self.stock == "MOEX":
             # price_str, meta = self.load_field_moex_("marketdata", "LAST", return_meta=True)
-            price, meta = self.load_fields_moex_("marketdata", ["LCURRENTPRICE"], return_meta=True)
+            price, meta = self.load_fields_moex_(
+                "marketdata", ["LCURRENTPRICE"], return_meta=True
+            )
             return self.field_to_float(price[0], meta), self.currency
 
         stock = yfinance.Ticker(self.ticker)
