@@ -34,8 +34,7 @@ class Security(Paper):
         else:
             raise "Incorrect stock name."
         if stock == "MOEX":
-            self.load_board_()
-        if stock == "MOEX":
+            self.load_moex_board_()
             fields = self.load_fields_moex_('securities', ['SECNAME', 'CURRENCYID'])
             self.name = fields[0]
             self.currency = Currency(fields[1]) 
@@ -44,7 +43,7 @@ class Security(Paper):
             self.name = stock.info['shortName']
             self.currency = Currency(stock.info['currency'])
 
-    def load_board_(self) -> str:
+    def load_moex_board_(self) -> str:
         url = "https://iss.moex.com/iss/securities/" + self.ticker + ".xml" \
             "?iss.meta=off&iss.only=boards&boards.columns=is_primary,boardid"
         response = requests.get(url)
@@ -92,7 +91,7 @@ class Security(Paper):
             return float(price)
         except:
             raise Exception(
-                "Unable to load field for {}.\rQuery:\n{}\nResponce:\n{}".format(
+                "Unable to load field for {}.\nQuery:\n{}\nResponce:\n{}".format(
                     self.ticker, meta['url'], meta['response']
                 )
             )
