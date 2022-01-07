@@ -122,10 +122,10 @@ class Bond(Security):
             price, meta = self.load_fields_moex_(
                 "marketdata", ["LCURRENTPRICE"], return_meta=True
             )
+            percent_price = self.field_to_float(price[0], meta)
             fields, meta = self.load_fields_moex_(
                 "securities", ["FACEVALUE", "ACCRUEDINT"], return_meta=True
             )
-            percent_price = self.field_to_float(price[0], meta)
             face_value = self.field_to_float(fields[0], meta)
             accruedint = self.field_to_float(fields[1], meta)
             return percent_price / 100 * face_value + accruedint, self.currency
