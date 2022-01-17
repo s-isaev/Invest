@@ -13,7 +13,7 @@ class Paper():
 class Currency(Paper):
     def __init__(self, ticker: str) -> None:
         super().__init__(ticker)
-        if ticker == "SUR" or ticker == "RUR":
+        if ticker in ("SUR", "RUR"):
             self.ticker = "RUB"
 
     def price(self) -> tuple[float, Currency]:
@@ -29,13 +29,12 @@ class Currency(Paper):
 class Security(Paper):
     def __init__(self, ticker: str, stock: str) -> None:
         super().__init__(ticker)
-        if stock == "MOEX" or stock == "OTHR":
-            self.stock = stock
-        else:
+        if stock not in ("MOEX", "OTHR"):
             raise "Incorrect stock name."
+        self.stock = stock
         if stock == "MOEX":
             self.load_moex_board_()
-            fields = self.load_fields_moex_('securities', ['SECNAME', 'CURRENCYID'])
+            fields = self.load_fields_moex_('securities', ('SECNAME', 'CURRENCYID'))
             self.name = fields[0]
             self.currency = Currency(fields[1]) 
         else:
@@ -56,14 +55,14 @@ class Security(Paper):
             if items[0][1] == '1':
                 self.board_id_ = items[1][1]
         if self.board_id_ is None:
-            raise "Not found."
+            raise "Not found"
 
         if self.board_id_ in ["TQOB", "EQOB", "TQOD", "TQCB", "EQQI", "TQIR"]:
             self.moex_security_type_ = "bonds"
         elif self.board_id_ in ["TQTF", "TQBR", "SNDX", "TQIF", "TQTD"]:
             self.moex_security_type_ = "shares"
         else:
-            raise "Unknown board."
+            raise "Unknown board"
 
     def load_fields_moex_(self, table, fields, return_meta=False) -> str:
         url = "https://iss.moex.com/iss/engines/stock/markets/" \
@@ -84,7 +83,7 @@ class Security(Paper):
                 if return_meta:
                     return res, {"url": url, "response": response.content.decode('utf-8')}
                 return res
-        raise "Not found."
+        raise "Not found"
 
     def field_to_float(self, price: str, meta: dict) -> float:
         try:
@@ -99,14 +98,14 @@ class Security(Paper):
 
 
 class Share(Security):
-    def __init__(self, ticker: str, stock: str|None) -> None:
+    def __init__(self, ticker: str, stock: str) -> None:
         super().__init__(ticker, stock)
 
     def price(self) -> tuple[float, Currency]:
         if self.stock == "MOEX":
             # price_str, meta = self.load_field_moex_("marketdata", "LAST", return_meta=True)
             price, meta = self.load_fields_moex_(
-                "marketdata", ["LCURRENTPRICE"], return_meta=True
+                "marketdata", ("LCURRENTPRICE",), return_meta=True
             )
             return self.field_to_float(price[0], meta), self.currency
 
@@ -122,13 +121,13 @@ class Bond(Security):
         if self.stock == "MOEX":
             # percent_price = float(self.load_field_moex_("marketdata", "LAST"))
             price, meta = self.load_fields_moex_(
-                "marketdata", ["LCURRENTPRICE"], return_meta=True
+                "marketdata", ("LCURRENTPRICE",), return_meta=True
             )
             percent_price = self.field_to_float(price[0], meta)
             fields, meta = self.load_fields_moex_(
-                "securities", ["FACEVALUE", "ACCRUEDINT"], return_meta=True
+                "securities", ("FACEVALUE", "ACCRUEDINT"), return_meta=True
             )
             face_value = self.field_to_float(fields[0], meta)
             accruedint = self.field_to_float(fields[1], meta)
             return percent_price / 100 * face_value + accruedint, self.currency
-        raise "Only MOEX for bonds supproted."
+        raise "Only MOEX for bonds supproted"
