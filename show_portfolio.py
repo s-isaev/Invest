@@ -10,12 +10,14 @@ import time
 summary = portfolio.Summary(path='D:\Инвест\Invest\data')
 summary.load()
 
-def create_header(table: Table):
-    table.set_element((0, 2), Element("Price", DataType.STRING, 1))
+def create_header(table: Table, rubusd: float):
+    table.set_element((0, 1), Element("×{:,.2f}".format(1/rubusd), DataType.STRING))
+    table.set_element((0, 2), Element("Price", DataType.STRING))
     table.set_element((0, 3), Element("Share", DataType.STRING))
     table.set_element((0, 4), Element("Target", DataType.STRING))
     table.set_element((0, 5), Element("Ratio", DataType.STRING))
-    table.set_element((0, 7), Element("Buy", DataType.STRING, 1))
+    table.set_element((0, 6), Element("×{:,.2f}".format(1/rubusd), DataType.STRING))
+    table.set_element((0, 7), Element("Buy", DataType.STRING))
 
     table.set_element((1, 1), Element("(RUB)", DataType.STRING))
     table.set_element((1, 2), Element("(USD)", DataType.STRING))
@@ -71,7 +73,7 @@ while True:
     inv_classes.sort(key=cmp_key)
 
     table = Table((12, 8), [1,2,3,4,5,6,7,8,9,10])
-    create_header(table)
+    create_header(table, rubusd)
     for i, inv_class in enumerate(inv_classes):
         rub_n = invested_by_classes[inv_class[0]]
         ratio = 1/(targets[inv_class[0]] / (invested_by_classes[inv_class[0]]/capital_no_eurobonds))

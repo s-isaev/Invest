@@ -22,8 +22,24 @@ class Currency(Paper):
     def convert(self, target: Currency, value: float):
         if self.ticker == target.ticker:
             return value
-        c = CurrencyRates()
-        return value * c.get_rate(self.ticker, target.ticker)
+        if self.ticker == "USD" and target.ticker == "RUB":
+            c = float(self.load_usd_moex_())
+        elif self.ticker == "RUB" and target.ticker == "USD":
+            c = 1/float(self.load_usd_moex_())
+        else:
+            c = CurrencyRates().get_rate(self.ticker, target.ticker)
+        return value * c
+
+    def load_usd_moex_(self) -> str:
+        url = "https://iss.moex.com/iss/engines/currency/markets/index/securities.xml"\
+            "?iss.meta=off&iss.only=marketdata&marketdata.columns=SECID,CURRENTVALUE"
+        response = requests.get(url)
+        roots = ElementTree.fromstring(response.content).findall('.//row')
+        for root in roots:
+            items = root.items()
+            if items[0][1] == "USDFIX":
+                return items[1][1]
+        raise "Not found"
 
 
 class Security(Paper):
@@ -103,9 +119,9 @@ class Share(Security):
 
     def price(self) -> tuple[float, Currency]:
         if self.stock == "MOEX":
-            # price_str, meta = self.load_field_moex_("marketdata", "LAST", return_meta=True)
             price, meta = self.load_fields_moex_(
-                "marketdata", ("LCURRENTPRICE",), return_meta=True
+                # LCURRENTPRICE
+                "marketdata", ("LAST",), return_meta=True
             )
             return self.field_to_float(price[0], meta), self.currency
 
@@ -119,9 +135,9 @@ class Bond(Security):
 
     def price(self) -> tuple[float, Currency]:
         if self.stock == "MOEX":
-            # percent_price = float(self.load_field_moex_("marketdata", "LAST"))
             price, meta = self.load_fields_moex_(
-                "marketdata", ("LCURRENTPRICE",), return_meta=True
+                # LCURRENTPRICE
+                "marketdata", ("LAST",), return_meta=True
             )
             percent_price = self.field_to_float(price[0], meta)
             fields, meta = self.load_fields_moex_(
